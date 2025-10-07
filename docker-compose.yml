@@ -1,19 +1,24 @@
-version: "3.7"
 services:
   postgres:
     image: postgres:14
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: yape_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   zookeeper:
     image: confluentinc/cp-zookeeper:5.5.3
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
+
   kafka:
     image: confluentinc/cp-enterprise-kafka:5.5.3
-    depends_on: [zookeeper]
+    depends_on:
+      - zookeeper
     environment:
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
@@ -22,4 +27,45 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_JMX_PORT: 9991
     ports:
-      - 9092:9092
+      - "9092:9092"
+
+  transaction-service:
+    build: 
+      context: ./transaction-service
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/yape_db
+      KAFKA_BROKER: kafka:29092
+      PORT: 4000
+    depends_on:
+      - postgres
+      - kafka
+
+  anti-fraud-service:
+    build: 
+      context: ./anti-fraud-service
+      dockerfile: Dockerfile
+    ports:
+      - "4001:4001"
+    environment:
+      KAFKA_BROKER: kafka:29092
+      PORT: 4001
+    depends_on:
+      - kafka
+
+  api-gateway:
+    build: 
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      TRANSACTION_SERVICE_URL: http://transaction-service:4000/graphql
+      PORT: 3001
+    depends_on:
+      - transaction-service
+
+volumes:
+  postgres_data:

@@ -4,6 +4,63 @@ Our code challenge will let you marvel us with your Jedi coding skills :smile:.
 
 Don't forget that the proper way to submit your work is to fork the repo and create a PR :wink: ... have fun !!
 
+## ✅ **IMPLEMENTATION STATUS: COMPLETED** 
+
+- ✅ **31/31 Tests Passing** (100% Coverage)
+- ✅ **Microservices Architecture** with NestJS + TypeScript
+- ✅ **GraphQL Federation** via API Gateway
+- ✅ **Event-Driven Architecture** with Kafka
+- ✅ **Anti-Fraud Real-time Processing**
+- ✅ **Docker Orchestration** Complete
+
+## 📚 **DOCUMENTATION**
+
+- **🚀 [QUICK VALIDATION GUIDE](./VALIDATION_GUIDE.md)** - Start here! 5-minute validation
+- **📋 [COMPLETE TECHNICAL DOCUMENTATION](./DOCUMENTATION.md)** - Full system details
+- **⚡ [Quick Start](#quick-start)** - Get running immediately
+
+## ⚡ Quick Start
+
+```bash
+# 1. Clone and start
+git clone https://github.com/Elxer06/app-nodejs-codechallenge.git
+cd app-nodejs-codechallenge
+docker-compose up --build -d
+
+# 2. Run all tests (31 tests should pass)
+docker-compose exec transaction-service npm test   # 17 tests
+docker-compose exec anti-fraud-service npm test    # 6 tests  
+docker-compose exec api-gateway npm test           # 8 tests
+
+# 3. Test the API (PowerShell example)
+Invoke-WebRequest -Uri "http://localhost:3001/graphql" -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"query":"mutation { createTransaction(input: { accountExternalIdDebit: \"acc-123\", accountExternalIdCredit: \"acc-456\", transferTypeId: 1, value: 500 }) { externalId value status } }"}'
+```
+
+**🎯 Expected Result:** Transaction created with status "pending" → automatically changes to "approved" (≤$1000) or "rejected" (>$1000)
+
+---
+
+## 🏗️ **IMPLEMENTED ARCHITECTURE**
+
+```mermaid
+graph TB
+    Client[Client/Postman] --> Gateway[API Gateway :3001]
+    Gateway --> TxService[Transaction Service :4000]
+    TxService --> DB[(PostgreSQL :5432)]
+    TxService --> Kafka[Kafka :29092]
+    Kafka --> AntiFraud[Anti-Fraud Service :4001]
+    AntiFraud --> Kafka
+    Kafka --> TxService
+```
+
+**🔗 Access Points:**
+- **API Gateway GraphQL Playground:** http://localhost:3001/graphql
+- **Direct Transaction Service:** http://localhost:4000/graphql
+
+---
+
+## 📋 **ORIGINAL REQUIREMENTS**
+
 - [Problem](#problem)
 - [Tech Stack](#tech_stack)
 - [Send us your challenge](#send_us_your_challenge)

@@ -1,0 +1,21 @@
+# Prisma
+prisma/
+
+# Dependencies
+node_modules/
+
+# Build
+dist/
+
+# Environment
+.env
+
+# Logs
+*.log
+
+# Coverage
+coverage/
+
+# IDE
+.vscode/
+.idea/
